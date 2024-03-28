@@ -6,11 +6,16 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import com.example.facturas.constantes.FacturaConstantes;
 import com.example.facturas.dao.UserDAO;
 import com.example.facturas.pojo.User;
+import com.example.facturas.security.CustomerDetailsService;
+import com.example.facturas.security.jwt.JwtUtil;
 import com.example.facturas.service.UserService;
 import com.example.facturas.util.FacturaUtils;
 
@@ -22,6 +27,16 @@ public class UserServiceImpl implements UserService{
 
     @Autowired
     private UserDAO userDAO;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private CustomerDetailsService customerDetailsService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
 
     @Override
     public ResponseEntity<String> signUp(Map<String, String> requestMap) {
@@ -67,9 +82,32 @@ public class UserServiceImpl implements UserService{
         user.setNumeroDeContacto(requestMap.get("numeroDeContacto"));
         user.setEmail(requestMap.get("email"));
         user.setPassword(requestMap.get("password"));
-        user.setRol("user");
+        user.setRole("user");
         user.setStatus("false");
 
         return user;
     }
+
+    @Override
+    public ResponseEntity<String> login(Map<String, String> requestMap) {
+        log.info("Login interno {}", requestMap);
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(requestMap.get("email"), requestMap.get("password"))
+            );
+            
+            if (authentication.isAuthenticated()) {
+                if (customerDetailsService.getUserDetails().getStatus().equalsIgnoreCase("true")) {
+                    //return new ResponseEntity<String>("{\"token\":\""+"sadasd"+"\"}", HttpStatus.OK);
+                     return new ResponseEntity<String>("{\"token\":\""+ jwtUtil.generateToken(customerDetailsService.getUserDetails().getEmail(), customerDetailsService.getUserDetails().getRole())+"\"}", HttpStatus.OK); 
+                }else{
+                    return new ResponseEntity<String>("{\"mensaje\":\""+"Espere la aprovacion del Administrador"+"\"}", HttpStatus.BAD_REQUEST);
+                }
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new ResponseEntity<String>("{\"mensaje\":\""+"Credenciales incorrectas "+"\"}", HttpStatus.BAD_REQUEST);
+    }
+    
 }

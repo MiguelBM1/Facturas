@@ -1,4 +1,4 @@
-package com.example.facturas.jwt;
+package com.example.facturas.security.jwt;
 
 import java.security.Key;
 import java.util.Date;
@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -14,10 +15,12 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
+
 @Service
 public class JwtUtil {
 
-    private String secret = "springboot";
+    @Value("${security-secret-key-signed}")
+    private String secret;
 
 
     public String extractUsername(String token){
@@ -39,7 +42,7 @@ public class JwtUtil {
     }
 
     public Claims extractAllClaims(String token){
-        return Jwts.parser().setSigningKey(generateKey()).build()
+        return Jwts.parserBuilder().setSigningKey(generateKey()).build()
         .parseClaimsJws(token).getBody(); 
     }
 
@@ -61,10 +64,10 @@ public class JwtUtil {
         return Jwts.builder()
         .setClaims(claims)
         .setSubject(subject)
-        .setSubject(subject)
         .setIssuedAt(new Date(System.currentTimeMillis()))
         .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
-        .signWith(generateKey(),SignatureAlgorithm.HS256).compact();
+        .signWith(SignatureAlgorithm.HS256,generateKey())
+        .compact();
 
         
     }

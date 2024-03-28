@@ -38,8 +38,8 @@ public class User {
     @Column(name = "password")
     private String password;
 
-    @Column(name = "rol")
-    private String rol;
+    @Column(name = "role")
+    private String role;
 
     @Column(name = "status")
     private String status;

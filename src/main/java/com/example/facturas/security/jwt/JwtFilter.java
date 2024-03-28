@@ -1,4 +1,4 @@
-package com.example.facturas.jwt;
+package com.example.facturas.security.jwt;
 
 import java.io.IOException;
 
@@ -9,6 +9,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import com.example.facturas.security.CustomerDetailsService;
 
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;

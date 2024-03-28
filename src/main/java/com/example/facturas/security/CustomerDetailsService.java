@@ -1,4 +1,4 @@
-package com.example.facturas.jwt;
+package com.example.facturas.security;
 
 import java.util.ArrayList;
 import java.util.Objects;
